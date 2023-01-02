@@ -70,7 +70,7 @@ model.objective2 = Objective(expr=-((model.y-2)**2+1), sense=maximize)
 model.c1 = Constraint(expr=model.x>=0)
 model.c2 = Constraint(expr=model.y>=0)
 mo = MultiObjective(model)
-model_goal = goalprogramming.goalprogramming(mo,dict({"objective1":0.2,"objective2":1.1}))
+model_goal = goalprogramming.goalprogramming(mo,dict({"objective1":0.2,"objective2":1.1}),dict({"objective1":2,"objective2":1}))
 print(model_goal.x.value)
 print(model_goal.y.value)
 """
