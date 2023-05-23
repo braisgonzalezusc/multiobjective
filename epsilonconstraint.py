@@ -72,11 +72,11 @@ def epsilonconstr(mo, obj_main=None, payofftable=None, ngrid=5):
     print("****epsilons****")
     print(epsilon)
 
-
     # Set main objective as objective function
     mo.activate_objfun_byName(obj_main)
 
     # Add constraints associated to epsilons: f2<= Eps2, f3<=Eps3,....fn<=Epsn
+    # We are considering a minimization problem
     pymodel = mo.pyo_model
     pymodel.objs_dict = mo.objs_dict
     pymodel.objconset = list(mo.objs_dict.keys())[1:]
@@ -95,6 +95,7 @@ def epsilonconstr(mo, obj_main=None, payofftable=None, ngrid=5):
         for obj, epsval in zip(epsilon.keys(), eps_iter):
             pymodel.epsilons[obj] = epsval
 
+        # TODO: CHECK IF THE MODEL IS FEASIBLE AND REMOVE STEPS IF IT IS NECESSARY
         solved_model = mo.solve()
         objs_val = {
             k: mo.objs_dict[k].expr() for k in pymodel.objs_dict
