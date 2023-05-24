@@ -73,7 +73,7 @@ def epsilonconstr(mo, obj_main=None, payofftable=None, ngrid=5):
     print(epsilon)
 
     # Set main objective as objective function
-    mo.activate_objfun_byName(obj_main)
+    mo.activate_objfun_by_name(obj_main)
 
     # Add constraints associated to epsilons: f2<= Eps2, f3<=Eps3,....fn<=Epsn
     # We are considering a minimization problem
