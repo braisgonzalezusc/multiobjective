@@ -35,6 +35,11 @@ class MultiObjective:
             obj.expr = obj.sense * obj.expr
             obj.sense = 1
 
+    def convert_to_maximization(self):
+        for obj in self.pyo_model.component_objects(Objective):
+            obj.expr = -1 * obj.expr
+            obj.sense = -1
+
     def activate_one_objfun(self, index):
         counter = 1
         current_obj = None

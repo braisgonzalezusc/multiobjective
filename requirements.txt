@@ -1,0 +1,8 @@
+numpy
+pyomo
+#pandas
+#plotly
+#scipy
+#jmetalpy
+#pyscipopt
+#gurobipy

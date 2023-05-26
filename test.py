@@ -32,7 +32,7 @@ print(model_lex.x.value)
 print(model_lex.y.value)
 """
 
-"""
+
 # Example epsilon constraint method
 from multiobjective import *
 import lexicographic
@@ -45,7 +45,7 @@ model.objective2 = Objective(expr=3*model.x1+4*model.x2, sense=maximize)
 model.c1 = Constraint(expr=model.x1<=20)
 model.c2 = Constraint(expr=model.x2<=40)
 model.c3 = Constraint(expr=5*model.x1+4*model.x2 <= 200)
-mo = MultiObjective(model, converToMin=True)
+mo = MultiObjective(model, conver_to_min=True)
 #payofftable,objs_range = compute_payofftable(mo)
 
 ngrid = 5
@@ -56,7 +56,7 @@ payofftable = {
 }
 
 pareto_front, vars_sol = epsilonconstr(mo, obj_main=None, payofftable=None, ngrid=5)
-"""
+
 
 """
 # Example goal programming
@@ -91,3 +91,27 @@ model_goal = weightedmetrics.weightedmetrics(mo,dict({"objective1":0.2,"objectiv
 print(model_goal.x.value)
 print(model_goal.y.value)
 """
+
+
+# def pruebo_recursividad(ind):
+#     print("Pruebo_recur: ",ind)
+#     max = 10
+#     cur = 1
+#     while cur < max:
+#         print("indcur",ind)
+#         print("cur", cur)
+#         jump = calculatejump(ind)
+#         cur += jump
+#
+# def calculatejump(ind):
+#     print("calculo jump: ", ind)
+#     if ind > 2:
+#         pruebo_recursividad(ind - 1)
+#         return 1
+#
+#     print("-------")
+#     print("acabo!!")
+#     print("-------")
+#     return 100
+#
+# pruebo_recursividad(5)
