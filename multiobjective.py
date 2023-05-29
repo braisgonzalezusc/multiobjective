@@ -7,6 +7,8 @@ class MultiObjective:
     def __init__(self, pyo_model, conver_to_min=True):
         self.pyo_model = pyo_model.clone()
         self.pyo_model_original = pyo_model
+        # TODO: PUT AS INPUT ARGUMENT
+        self.solver = SolverFactory('ipopt')
         self.obj_uuid = str(uuid.uuid4()).replace("-", "")
         self.obj_uuid = "a" + self.obj_uuid[1:]
         self.cons_uuid = []
@@ -84,8 +86,7 @@ class MultiObjective:
                 self.cons_uuid.remove(con.name)
 
     def solve(self):
-        solver = SolverFactory('ipopt')
-        solver.solve(self.pyo_model)
+        self.solver.solve(self.pyo_model)
         return self.pyo_model
 
     def check_feasibility(self):
