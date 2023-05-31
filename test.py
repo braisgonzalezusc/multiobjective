@@ -57,7 +57,7 @@ print(model_lex.y.value)
 
 
 # Example 2 epsilon constraint method
-from epsilonconstraint import *
+from multiobjective.epsilonconstraint import *
 model = ConcreteModel()
 model.x1 = Var(bounds=(0, 1))
 model.x2 = Var(bounds=(0, 1))

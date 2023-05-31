@@ -1,9 +1,10 @@
 import numpy as np
 import pyomo.environ as pyo
 import itertools
-import lexicographic as lex
-from multiobjective import *
+import multiobjective.lexicographic as lex
+from multiobjective.multiobjective import *
 from pyomo.opt import SolverStatus, TerminationCondition
+#from multiobjective import *
 
 
 def compute_payofftable(mo: MultiObjective):
@@ -96,6 +97,10 @@ def epsilonconstr(mo, obj_main=None, payofftable=None, ngrid=5):
     # Build augmeconR problem
     pymodel = build_aumeconR_model(mo, obj_main, objs_range)
 
+    counter_obj = {
+        obj: [i for i in range(len(epsilon[obj]))] for obj in epsilon
+    }
+    grid_counters = list(itertools.product(*counter_obj.values()))
     grid_epsilons = list(itertools.product(*epsilon.values()))
     for step, eps_iter in enumerate(grid_epsilons):
         print('********')
@@ -110,6 +115,23 @@ def epsilonconstr(mo, obj_main=None, payofftable=None, ngrid=5):
         # Set the values to eps2, eps3,..., epsn
         for obj, epsval in zip(epsilon.keys(), eps_iter):
             pymodel.epsilons[obj] = epsval
+
+    # for step, count_iter in enumerate(grid_counters):
+    #     print('********')
+    #     print('step: ', step)
+    #     print('grid: ', count_iter)
+    #     if (count_iter in flag_skip_points):
+    #         print("Skip grid point: ", count_iter)
+    #         flag_skip_points.remove(count_iter)
+    #         continue
+    #
+    #     # print(step,eps_iter)
+    #     # Set the values to eps2, eps3,..., epsn
+    #     # for obj, epsval in zip(epsilon.keys(), eps_iter):
+    #     #    pymodel.epsilons[obj] = epsval
+    #
+    #     for obj, ind in zip(epsilon.keys(), count_iter):
+    #         pymodel.epsilons[obj] = epsilon[obj][ind]
 
         # TODO: CHECK IF THE MODEL IS FEASIBLE AND REMOVE STEPS IF IT IS NECESSARY
         result = mo.solver.solve(pymodel) # TODO: mo.solve return solved_model and status

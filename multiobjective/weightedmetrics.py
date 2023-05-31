@@ -1,7 +1,6 @@
 import uuid
 from pyomo.environ import *
 
-
 def weightedmetrics(mo, goals, w):
     var_id = mo.add_new_var()
     new_obj_id = str(uuid.uuid4()).replace("-", "")
