@@ -109,3 +109,18 @@ class MultiObjective:
         self.vars_uuid.append(var_id)
         setattr(self.pyo_model, var_id, Var())
         return var_id
+
+    def compute_infeasibility(self):
+        infeas = 0
+        for con in self.pyo_model.component_objects(Constraint):
+            if con.lb is None:
+                lb = -1e100
+            else:
+                lb = con.lb
+            if con.ub is None:
+                ub = 1e100
+            else:
+                ub = con.ub
+            infeas += max(0, lb - value(con)) + max(0, value(con) - ub)
+
+        return infeas

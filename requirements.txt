@@ -1,5 +1,6 @@
 numpy
 pyomo
+jmetalpy
 #pandas
 #plotly
 #scipy
