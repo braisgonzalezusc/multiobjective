@@ -48,10 +48,10 @@ def compute_payofftable(mo: MultiObjective):
 
 
 def epsilonconstr(mo, obj_main=None, payofftable=None, ngrid=5):
-    solved_model = None
+
     pareto_front = []
     vars_sol = []
-    flag_skip_points = []
+    flag_skip_points = set()
 
     # Check what is the main objective function
     if obj_main is None:
@@ -62,9 +62,11 @@ def epsilonconstr(mo, obj_main=None, payofftable=None, ngrid=5):
     # Compute payofftable
     if payofftable is None:
         payofftable, objs_range = compute_payofftable(mo)
+    else:
+        # TODO: THE USER GIVE RANGES, NOT PAYOFF TABLE!
+        objs_range = payofftable
 
     # Grid points
-    # TODO: INSTEAD OF WORKING WITH GRID POINTS DIRECTLY, USE THE INDICES FOR EACH OBJECTIVE!
     # THIS WILL AVOID APPROXIMATION PROBLEM TO SEE IF IT IS NECESSARY TO JUMP
     epsilon = {}
     stepsobj = {}
@@ -90,7 +92,7 @@ def epsilonconstr(mo, obj_main=None, payofftable=None, ngrid=5):
         print('********')
         print('step: ', step)
         print('grid: ', count_iter)
-        if (count_iter in flag_skip_points):
+        if count_iter in flag_skip_points:
             print("Skip grid point: ", count_iter)
             flag_skip_points.remove(count_iter)
             continue
@@ -104,7 +106,7 @@ def epsilonconstr(mo, obj_main=None, payofftable=None, ngrid=5):
         if (result.solver.status == SolverStatus.ok) and (
                 result.solver.termination_condition == TerminationCondition.optimal):
             objs_val = {
-                k: -mo.objs_dict[k].expr() for k in pymodel.objs_dict # TODO: RETURN SIGN OF OBJECTIVE VALUES DEPENDING ON ORIGINAL SENSE
+                k: mo.objs_dict[k].expr() for k in pymodel.objs_dict # TODO: RETURN SIGN OF OBJECTIVE VALUES DEPENDING ON ORIGINAL SENSE
             }
             vars_val = {
                 str(v): pyo.value(v) for v in pymodel.component_data_objects(pyo.Var, active=True)
@@ -121,7 +123,8 @@ def epsilonconstr(mo, obj_main=None, payofftable=None, ngrid=5):
             flag_skip_points = calculate_infeasible_jump(pymodel, count_iter, epsilon, flag_skip_points)
         else:
             # something else is wrong
-            print(str(result.solver))
+            print("ERROR solver status \n", str(result.solver))
+            raise Exception("solver error")
             break
 
     return pareto_front, vars_sol
@@ -199,7 +202,7 @@ def build_aumeconR_model(mo, obj_main, obj_range):
 
 def calculate_slack_jump(pymodel, count_iter, epsilon, flag_skip_points):
 
-    slack_skip_points = []
+    #slack_skip_points = []
     for ind, obj in enumerate(pymodel.objconset):
         # Get slack value
         slack_val = pymodel.slack_variables[obj].value
@@ -211,17 +214,20 @@ def calculate_slack_jump(pymodel, count_iter, epsilon, flag_skip_points):
             ind_obj = count_iter[ind]
             max_obj = epsilon[obj][ind]+slack_val
             skip_point = list(count_iter)
+            # Assuming that epsilon values are ordered from smaller to bigger numbers
             for i in range(ind_obj+1, len(epsilon[obj])):
                 if epsilon[obj][i] <= max_obj:
                     skip_point[ind] = i
-                    if skip_point not in flag_skip_points:
-                        slack_skip_points.append(tuple(skip_point))
-                else:  # Assuming that epsilon values are ordered from smaller to bigger numbers
+                    if tuple(skip_point) not in flag_skip_points:
+                    #    slack_skip_points.append(tuple(skip_point))
+                        print("New slack skip points: ", tuple(skip_point))
+                    flag_skip_points.add(tuple(skip_point))
+                else:
                     break
 
-    if(len(slack_skip_points)>0):
-        print("New slack skip points: ", slack_skip_points)
-        flag_skip_points += slack_skip_points
+    #if(len(slack_skip_points)>0):
+    #    print("New slack skip points: ", slack_skip_points)
+
     return flag_skip_points
 
 
@@ -234,16 +240,16 @@ def calculate_infeasible_jump(pymodel, count_iter, epsilons, flag_skip_points):
             for ind, obj in enumerate(pymodel.objconset)
     }
     #print('Infeasible grid points: ',infeas_grids_points)
-    infeas_skip_points = []
+    infeas_skip_points = set()
     for point_iter in list(itertools.product(*infeas_grids_points.values())):
         if point_iter not in flag_skip_points:
-            infeas_skip_points.append(point_iter)
+            infeas_skip_points.add(point_iter)
 
     # Remove current point from the list (necessary to avoid problems when one objective function is in the final index)
     infeas_skip_points.remove(count_iter)
     if (len(infeas_skip_points) > 0):
         print("New Infeasible skip points: ", infeas_skip_points)
-        flag_skip_points += infeas_skip_points
+        flag_skip_points = flag_skip_points.union(infeas_skip_points)
 
     return flag_skip_points
 

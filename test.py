@@ -34,27 +34,47 @@ print(model_lex.y.value)
 
 
 # # Example 1 epsilon constraint method
-# from multiobjective.epsilonconstraint import *
-# model = ConcreteModel()
-# model.x1 = Var()
-# model.x2 = Var()
-# model.objective1 = Objective(expr=model.x1, sense=maximize)
-# model.objective2 = Objective(expr=3*model.x1+4*model.x2, sense=maximize)
-# model.c1 = Constraint(expr=model.x1<=20)
-# model.c2 = Constraint(expr=model.x2<=40)
-# model.c3 = Constraint(expr=5*model.x1+4*model.x2 <= 200)
-# mo = MultiObjective(model, conver_to_min=True)
-# #payofftable,objs_range = compute_payofftable(mo)
-#
-# ngrid = 5
-# payofftable = {
-#     'objective1': [8, 20],
-#    # 'objective2': [160, 184] #[60, 184]
-#     'objective2': [60, 184]
-# }
-#
-# pareto_front, vars_sol = epsilonconstr(mo, obj_main=None, payofftable=None, ngrid=5)
+from multiobjective.epsilonconstraint import *
+model = ConcreteModel()
+model.x1 = Var()
+model.x2 = Var()
+model.objective1 = Objective(expr=model.x1, sense=maximize)
+model.objective2 = Objective(expr=3*model.x1+4*model.x2, sense=maximize)
+model.c1 = Constraint(expr=model.x1<=20)
+model.c2 = Constraint(expr=model.x2<=40)
+model.c3 = Constraint(expr=5*model.x1+4*model.x2 <= 200)
+mo = MultiObjective(model, conver_to_min=True)
+#payofftable,objs_range = compute_payofftable(mo)
 
+ngrid = 5
+ranges = {
+    'objective1': [8, 20],
+   # 'objective2': [160, 184] #[60, 184]
+    'objective2': [60, 184]
+}
+
+pareto_front, vars_sol = epsilonconstr(mo, obj_main=None, payofftable=ranges, ngrid=5)
+
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+
+# Create pandas frame with algorithm pareto front
+df = pd.DataFrame(pareto_front, columns=list(mo.objs_dict.keys()))
+# Create the figure:
+fig = go.Figure()
+# Create and style traces
+fig.add_trace(go.Scatter(x=df[list(mo.objs_dict.keys())[0]],
+                         y=df[list(mo.objs_dict.keys())[1]],
+                         name='Algorithm pareto front',
+                         line=dict(color='firebrick', width=4, dash='dot'),
+                         mode='lines+markers'))
+fig.show()
+
+# Edit the layout
+fig.update_layout(title='Pareto Frontier',
+                   xaxis_title=list(mo.objs_dict.keys())[0],
+                   yaxis_title=list(mo.objs_dict.keys())[1])
 
 # Example 2 epsilon constraint method
 # from multiobjective.epsilonconstraint import *
@@ -73,6 +93,7 @@ print(model_lex.y.value)
 #
 # pareto_front, vars_sol = epsilonconstr(mo, obj_main=None, payofftable=None, ngrid=ngrid)
 
+"""
 # Example 3: ZDT problem for Jmetal
 from multiobjective.epsilonconstraint import *
 from multiobjective.jmetalinterface import encode_solution_to_jmetal, update_pyomo_solution_from_jmetal
@@ -94,12 +115,12 @@ def hfun(model):
 model.h = hfun(model)
 model.f2 = Objective(expr=model.h*model.g, sense=minimize)
 mo = MultiObjective(model, conver_to_min=True)
-#payofftable, objs_range = compute_payofftable(mo)
+payofftable, objs_range = compute_payofftable(mo)
 #ngrid = 1000
-#ngrid = 50
-#pareto_front, vars_sol = epsilonconstr(mo, obj_main=None, payofftable=None, ngrid=ngrid)
+ngrid = 50
+pareto_front, vars_sol = epsilonconstr(mo, obj_main=None, payofftable=None, ngrid=ngrid)
 
-"""
+
 #########################
 # Plot front with plotly
 ########################
@@ -141,14 +162,16 @@ fig.update_layout(title='Pareto Frontier',
                    xaxis_title=list(mo.objs_dict.keys())[0],
                    yaxis_title=list(mo.objs_dict.keys())[1])
 
-"""
+
 
 #soljmetal, mappyomo = encode_solution_to_jmetal(mo)
 #print(soljmetal)
 #update_pyomo_solution_from_jmetal(mo, soljmetal, mappyomo)
 #for v in mo.pyo_model.component_data_objects(pyo.Var, active=True):
 #    print('%s = %d', str(v), pyo.value(v))
+"""
 
+"""
 # ZDT1 resuelto directamente con jmetal:
 from jmetal.algorithm.multiobjective.nsgaii import NSGAII
 from jmetal.lab.visualization import InteractivePlot, Plot
@@ -223,6 +246,7 @@ print_variables_to_file(front, "VAR." + algorithm.label)
 print(f"Algorithm: {algorithm.get_name()}")
 print(f"Problem: {problem.name()}")
 print(f"Computing time: {algorithm.total_computing_time}")
+"""
 
 #import pyomo.core.plugins.transform.scaling as scale
 
