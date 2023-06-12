@@ -3,7 +3,7 @@ def lexicographic(mo, order):
     for i in order:
         objfun = mo.activate_one_objfun(i)
         solved_model = mo.solve()
-        # TODO: CHECK IF THE SOLUTION IS FEASIBLE
+        # TODO: CHECK IF THE SOLUTION IS FEASIBLE, OTHERWISE YOU DO NOT HAVE A VALUE FOR THE OBJECTIVE FUNCTION!
         # Added method mo.check_feasibility() but I do not know why it is necessary to check feasibility in this case
         opt_val = objfun.expr()
         mo.add_constraint(objfun.expr <= opt_val)

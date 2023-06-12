@@ -32,7 +32,7 @@ print(model_lex.x.value)
 print(model_lex.y.value)
 """
 
-
+"""
 # # Example 1 epsilon constraint method
 from multiobjective.epsilonconstraint import *
 model = ConcreteModel()
@@ -56,7 +56,6 @@ ranges = {
 pareto_front, vars_sol = epsilonconstr(mo, obj_main=None, payofftable=ranges, ngrid=5)
 
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
 
 # Create pandas frame with algorithm pareto front
@@ -75,6 +74,7 @@ fig.show()
 fig.update_layout(title='Pareto Frontier',
                    xaxis_title=list(mo.objs_dict.keys())[0],
                    yaxis_title=list(mo.objs_dict.keys())[1])
+"""
 
 # Example 2 epsilon constraint method
 # from multiobjective.epsilonconstraint import *
@@ -93,10 +93,9 @@ fig.update_layout(title='Pareto Frontier',
 #
 # pareto_front, vars_sol = epsilonconstr(mo, obj_main=None, payofftable=None, ngrid=ngrid)
 
-"""
+
 # Example 3: ZDT problem for Jmetal
 from multiobjective.epsilonconstraint import *
-from multiobjective.jmetalinterface import encode_solution_to_jmetal, update_pyomo_solution_from_jmetal
 
 #from jmetal.problem.multiobjective.zdt import
 
@@ -115,12 +114,12 @@ def hfun(model):
 model.h = hfun(model)
 model.f2 = Objective(expr=model.h*model.g, sense=minimize)
 mo = MultiObjective(model, conver_to_min=True)
-payofftable, objs_range = compute_payofftable(mo)
+#payofftable, objs_range = compute_payofftable(mo)
 #ngrid = 1000
 ngrid = 50
 pareto_front, vars_sol = epsilonconstr(mo, obj_main=None, payofftable=None, ngrid=ngrid)
 
-
+"""
 #########################
 # Plot front with plotly
 ########################
@@ -139,21 +138,21 @@ reference_front = read_solutions(filename="C:/Users/ANGEL/Documents/Git reposito
 exact_front = []
 for sol in reference_front:
     exact_front.append(sol.objectives)
-df_exact_front = pd.DataFrame(pareto_front, columns=list(mo.objs_dict.keys()))
+df_exact_front = pd.DataFrame(exact_front, columns=list(mo.objs_dict.keys()))
 
 # Create the figure:
 fig = go.Figure()
 # Create and style traces
-fig.add_trace(go.Scatter(x=df[list(mo.objs_dict.keys())[0]],
-                         y=df[list(mo.objs_dict.keys())[1]],
+fig.add_trace(go.Scatter(x=-df[list(mo.objs_dict.keys())[0]], # Ponemos menos para transformar de nuevo en minimizar
+                         y=-df[list(mo.objs_dict.keys())[1]], # Ponemos menos para transformar de nuevo en minimizar
                          name='Algorithm pareto front',
                          line=dict(color='firebrick', width=4, dash='dot'),
                          mode='lines+markers'))
 
-fig.add_trace(go.Scatter(x=df[list(mo.objs_dict.keys())[0]],
-                         y=df[list(mo.objs_dict.keys())[1]],
+fig.add_trace(go.Scatter(x=df_exact_front[list(mo.objs_dict.keys())[0]],
+                         y=df_exact_front[list(mo.objs_dict.keys())[1]],
                          name='Exact front',
-                         line=dict(color='azure', width=4), #, dash='dash'),
+                         line=dict(color='azure', width=4, dash='dash'),
                          mode='lines+markers'))
 fig.show()
 
@@ -162,16 +161,8 @@ fig.update_layout(title='Pareto Frontier',
                    xaxis_title=list(mo.objs_dict.keys())[0],
                    yaxis_title=list(mo.objs_dict.keys())[1])
 
-
-
-#soljmetal, mappyomo = encode_solution_to_jmetal(mo)
-#print(soljmetal)
-#update_pyomo_solution_from_jmetal(mo, soljmetal, mappyomo)
-#for v in mo.pyo_model.component_data_objects(pyo.Var, active=True):
-#    print('%s = %d', str(v), pyo.value(v))
 """
 
-"""
 # ZDT1 resuelto directamente con jmetal:
 from jmetal.algorithm.multiobjective.nsgaii import NSGAII
 from jmetal.lab.visualization import InteractivePlot, Plot
@@ -246,34 +237,6 @@ print_variables_to_file(front, "VAR." + algorithm.label)
 print(f"Algorithm: {algorithm.get_name()}")
 print(f"Problem: {problem.name()}")
 print(f"Computing time: {algorithm.total_computing_time}")
-"""
-
-#import pyomo.core.plugins.transform.scaling as scale
-
-# print("caca")
-#
-# from pyomo.environ import *
-# # create the model
-# model = ConcreteModel()
-# model.x = Var(bounds=(-5, 5), initialize=1.0)
-# model.y = Var(bounds=(0, 1), initialize=1.0)
-# model.obj = Objective(expr=1e8*model.x + 1e6*model.y)
-# model.con = Constraint(expr=model.x + model.y == 1.0)
-# # create the scaling factors
-# model.scaling_factor = Suffix(direction=Suffix.EXPORT)
-# model.scaling_factor[model.obj] = 1e-6 # scale the objective
-# model.scaling_factor[model.con] = 2.0  # scale the constraint
-# model.scaling_factor[model.x] = 0.2    # scale the x variable
-# # transform the model
-# scaled_model = TransformationFactory('core.scale_model').create_using(model)
-#
-# TransformationFactory('core.scale_model').propagate_solution(scaled_model, model)
-# # print the value of the objective function to show scaling has occurred
-# print(value(model.x))
-# print(value(scaled_model.scaled_x))
-# print(value(scaled_model.scaled_x.lb))
-# print(value(model.obj))
-# print(value(scaled_model.scaled_obj))
 
 
 """
@@ -310,26 +273,12 @@ print(model_goal.x.value)
 print(model_goal.y.value)
 """
 
-
-# def pruebo_recursividad(ind):
-#     print("Pruebo_recur: ",ind)
-#     max = 10
-#     cur = 1
-#     while cur < max:
-#         print("indcur",ind)
-#         print("cur", cur)
-#         jump = calculatejump(ind)
-#         cur += jump
+# import random
 #
-# def calculatejump(ind):
-#     print("calculo jump: ", ind)
-#     if ind > 2:
-#         pruebo_recursividad(ind - 1)
-#         return 1
 #
-#     print("-------")
-#     print("acabo!!")
-#     print("-------")
-#     return 100
+# def initialize(mo):
+#     init_values = {}
+#     for v in mo.pyo_model.component_data_objects(pyo.Var, active=True):
+#         init_values[v.name] = random.uniform(v.lb * 1.0, v.ub * 1.0)
+#     return init_values
 #
-# pruebo_recursividad(5)

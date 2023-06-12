@@ -1,6 +1,8 @@
 from pyomo.environ import *
 import uuid
 
+_inf = float('inf')
+
 
 class MultiObjective:
 
@@ -92,11 +94,11 @@ class MultiObjective:
     def check_feasibility(self):
         for con in self.pyo_model.component_objects(Constraint):
             if con.lb is None:
-                lb = -1e100
+                lb = -_inf
             else:
                 lb = con.lb
             if con.ub is None:
-                ub = 1e100
+                ub = _inf
             else:
                 ub = con.ub
             if not (lb <= value(con) <= ub):
@@ -114,11 +116,11 @@ class MultiObjective:
         infeas = 0
         for con in self.pyo_model.component_objects(Constraint):
             if con.lb is None:
-                lb = -1e100
+                lb = -_inf
             else:
                 lb = con.lb
             if con.ub is None:
-                ub = 1e100
+                ub = _inf
             else:
                 ub = con.ub
             infeas += max(0, lb - value(con)) + max(0, value(con) - ub)
